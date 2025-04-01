@@ -41,22 +41,6 @@ The response body must be in JSON format and include the following fields:
 | `token`             | String | ---      | It return a generated token.             | 
 
 ### Responses Example
-```json
-{
-  "user": {
-    "fullname":{
-        "firstname":"John",
-        "lastname":"Doe"
-    },
-    "email": "john.doe@example.com",
-    "password": "password123"
-  },
-}
-
-{
-    "token": "JWT Token"
-}
-
 #### Success (201 Created)
 ```json
 {
