@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useContext } from 'react'
 import { Link } from 'react-router-dom'
 import { useState } from 'react'
 import { CaptainDataContext } from '../context/CaptainContext'
@@ -11,12 +11,13 @@ const CaptainSignup = () => {
     const [password, setPassword] = useState('')
     const [firstName, setFirstName] = useState('')
     const [lastName, setLastName] = useState('')
+
     const [vehicleColor, setVehicleColor] = useState('');
     const [vehiclePlate, setVehiclePlate] = useState('');
     const [vehicleCapacity, setVehicleCapacity] = useState('');
     const [vehicleType, setVehicleType] = useState('');
 
-    const {captain, setCaptain} = React.useContext(CaptainDataContext);
+    const {captain, setCaptain} = useContext(CaptainDataContext);
   
     const submitHandler = async(e) => {
       e.preventDefault();
@@ -34,12 +35,16 @@ const CaptainSignup = () => {
           vehicleType: vehicleType,
         }
       }
-      const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/captains/register`, captainData)
-      if(response.status === 201){
-        const data = response.data
-        setCaptain(data.captain)
-        localStorage.setItem('token', data.token)
-        navigate('/captain-home')
+      try {
+        const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/captains/register`, captainData)
+        if(response.status === 201){
+          const data = response.data
+          setCaptain(data.captain)
+          localStorage.setItem('token', data.token)
+          navigate('/captain-home')
+        }
+      } catch (error) {
+        console.log(error.response.data.message);
       }
       setEmail('');
       setPassword('');
@@ -143,7 +148,7 @@ const CaptainSignup = () => {
           <p className='text-center'>Already have a account? <Link to='/captain-login' className='text-blue-600 '>Login in here</Link></p>
         </div>
         <div>
-          <p className='text-[10px] leading-tight'>
+          <p className='mt-6 text-[10px] leading-tight'>
             This site is protected by reCAPTCHA and the Google <a href="https://policies.google.com/privacy" className='text-blue-600'>Privacy Policy</a> and <a href="https://policies.google.com/terms" className='text-blue-600'>Terms of Service</a> apply.
           </p>
         </div>
