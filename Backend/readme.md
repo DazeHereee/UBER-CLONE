@@ -581,3 +581,350 @@ Occurs when there is an issue on the server side.
 ### Notes
 - The token is blacklisted to prevent reuse.
 - Ensure the `Authorization` header contains a valid Bearer token.
+
+---
+
+## Endpoint: `/maps/get-coordinates`
+
+### Description
+This endpoint retrieves the geographical coordinates (latitude and longitude) for a given address.
+
+### Method
+`GET`
+
+### Query Parameters
+| Parameter | Type   | Required | Description                              |
+|-----------|--------|----------|------------------------------------------|
+| `address` | String | Yes      | The address for which coordinates are needed. |
+
+### Example Request
+```
+GET /maps/get-coordinates?address=1600+Amphitheatre+Parkway,+Mountain+View,+CA
+```
+
+### Responses Body
+The response body must be in JSON format and include the following fields:
+
+| Field | Type   | Description                              |
+|-------|--------|------------------------------------------|
+| `ltd` | Number | The latitude of the address.             |
+| `lng` | Number | The longitude of the address.            |
+
+### Responses Example
+#### Success (200 OK)
+```json
+{
+  "ltd": 37.4224764,
+  "lng": -122.0842499
+}
+```
+
+#### Error (400 Bad Request)
+Occurs when the `address` parameter is missing or invalid.
+```json
+{
+  "errors": [
+    {
+      "msg": "Invalid value",
+      "param": "address",
+      "location": "query"
+    }
+  ]
+}
+```
+
+#### Error (404 Not Found)
+Occurs when the coordinates for the given address cannot be found.
+```json
+{
+  "message": "Coordinate not Found"
+}
+```
+
+#### Error (500 Internal Server Error)
+Occurs when there is an issue on the server side.
+```json
+{
+  "message": "Internal server error"
+}
+```
+
+---
+
+## Endpoint: `/maps/get-distance-time`
+
+### Description
+This endpoint calculates the distance and estimated travel time between two locations.
+
+### Method
+`GET`
+
+### Query Parameters
+| Parameter      | Type   | Required | Description                              |
+|----------------|--------|----------|------------------------------------------|
+| `origin`       | String | Yes      | The starting location.                   |
+| `destination`  | String | Yes      | The destination location.                |
+
+### Example Request
+```
+GET /maps/get-distance-time?origin=New+York,+NY&destination=Los+Angeles,+CA
+```
+
+### Responses Body
+The response body must be in JSON format and include the following fields:
+
+| Field          | Type   | Description                              |
+|----------------|--------|------------------------------------------|
+| `distance`     | Object | The distance information (text and value in meters). |
+| `duration`     | Object | The duration information (text and value in seconds). |
+
+### Responses Example
+#### Success (200 OK)
+```json
+{
+  "distance": {
+    "text": "2,789 miles",
+    "value": 4487936
+  },
+  "duration": {
+    "text": "1 day 18 hours",
+    "value": 155520
+  }
+}
+```
+
+#### Error (400 Bad Request)
+Occurs when the `origin` or `destination` parameter is missing or invalid.
+```json
+{
+  "errors": [
+    {
+      "msg": "Invalid value",
+      "param": "origin",
+      "location": "query"
+    }
+  ]
+}
+```
+
+#### Error (500 Internal Server Error)
+Occurs when there is an issue on the server side.
+```json
+{
+  "message": "Internal server error"
+}
+```
+
+---
+
+## Endpoint: `/maps/get-suggestions`
+
+### Description
+This endpoint provides location suggestions based on user input.
+
+### Method
+`GET`
+
+### Query Parameters
+| Parameter | Type   | Required | Description                              |
+|-----------|--------|----------|------------------------------------------|
+| `input`   | String | Yes      | The partial input for which suggestions are needed. |
+
+### Example Request
+```
+GET /maps/get-suggestions?input=New+York
+```
+
+### Responses Body
+The response body must be in JSON format and include the following fields:
+
+| Field         | Type   | Description                              |
+|---------------|--------|------------------------------------------|
+| `predictions` | Array  | An array of location suggestions.        |
+
+### Responses Example
+#### Success (200 OK)
+```json
+{
+  "predictions": [
+    "New York, NY, USA",
+    "New York City, NY, USA",
+    "New York County, NY, USA"
+  ]
+}
+```
+
+#### Error (400 Bad Request)
+Occurs when the `input` parameter is missing or invalid.
+```json
+{
+  "errors": [
+    {
+      "msg": "Invalid value",
+      "param": "input",
+      "location": "query"
+    }
+  ]
+}
+```
+
+#### Error (500 Internal Server Error)
+Occurs when there is an issue on the server side.
+```json
+{
+  "message": "Internal server error"
+}
+```
+
+---
+
+## Endpoint: `/rides/create`
+
+### Description
+This endpoint is used to create a new ride. It calculates the fare based on the pickup and destination locations and the selected vehicle type.
+
+### Method
+`POST`
+
+### Headers
+| Header          | Type   | Required | Description                              |
+|------------------|--------|----------|------------------------------------------|
+| `Authorization` | String | Yes      | The Bearer token for authentication.     |
+
+### Request Body
+The request body must be in JSON format and include the following fields:
+
+| Field          | Type   | Required | Description                              |
+|----------------|--------|----------|------------------------------------------|
+| `pickup`       | String | Yes      | The pickup location.                     |
+| `destination`  | String | Yes      | The destination location.                |
+| `vehicleType`  | String | Yes      | The type of vehicle (`auto`, `car`, `moto`). |
+
+### Example Request
+```json
+{
+  "pickup": "1600 Amphitheatre Parkway, Mountain View, CA",
+  "destination": "1 Infinite Loop, Cupertino, CA",
+  "vehicleType": "car"
+}
+```
+
+### Responses Body
+The response body must be in JSON format and include the following fields:
+
+| Field          | Type   | Description                              |
+|----------------|--------|------------------------------------------|
+| `user`         | String | The ID of the user who created the ride. |
+| `pickup`       | String | The pickup location.                     |
+| `destination`  | String | The destination location.                |
+| `fare`         | Number | The calculated fare for the ride.        |
+| `otp`          | String | The OTP for ride verification.           |
+| `status`       | String | The status of the ride (`pending` by default). |
+
+### Responses Example
+#### Success (201 Created)
+```json
+{
+  "user": "user-id",
+  "pickup": "1600 Amphitheatre Parkway, Mountain View, CA",
+  "destination": "1 Infinite Loop, Cupertino, CA",
+  "fare": 150.75,
+  "otp": "123456",
+  "status": "pending"
+}
+```
+
+#### Error (400 Bad Request)
+Occurs when validation fails or required fields are missing.
+```json
+{
+  "errors": [
+    {
+      "msg": "Invalid pickup address",
+      "param": "pickup",
+      "location": "body"
+    }
+  ]
+}
+```
+
+#### Error (500 Internal Server Error)
+Occurs when there is an issue on the server side.
+```json
+{
+  "message": "Internal server error"
+}
+```
+
+---
+
+## Endpoint: `/rides/getFare`
+
+### Description
+This endpoint calculates the estimated fare for a ride based on the pickup and destination locations.
+
+### Method
+`GET`
+
+### Headers
+| Header          | Type   | Required | Description                              |
+|------------------|--------|----------|------------------------------------------|
+| `Authorization` | String | Yes      | The Bearer token for authentication.     |
+
+### Query Parameters
+| Parameter      | Type   | Required | Description                              |
+|----------------|--------|----------|------------------------------------------|
+| `pickup`       | String | Yes      | The pickup location.                     |
+| `destination`  | String | Yes      | The destination location.                |
+
+### Example Request
+```
+GET /rides/getFare?pickup=1600+Amphitheatre+Parkway,+Mountain+View,+CA&destination=1+Infinite+Loop,+Cupertino,+CA
+```
+
+### Responses Body
+The response body must be in JSON format and include the following fields:
+
+| Field          | Type   | Description                              |
+|----------------|--------|------------------------------------------|
+| `auto`         | Number | The estimated fare for an auto.          |
+| `car`          | Number | The estimated fare for a car.            |
+| `moto`         | Number | The estimated fare for a motorcycle.     |
+
+### Responses Example
+#### Success (200 OK)
+```json
+{
+  "auto": 50.25,
+  "car": 150.75,
+  "moto": 40.50
+}
+```
+
+#### Error (400 Bad Request)
+Occurs when validation fails or required fields are missing.
+```json
+{
+  "errors": [
+    {
+      "msg": "Invalid pickup address",
+      "param": "pickup",
+      "location": "query"
+    }
+  ]
+}
+```
+
+#### Error (500 Internal Server Error)
+Occurs when there is an issue on the server side.
+```json
+{
+  "message": "Internal server error"
+}
+```
+
+---
+
+### Notes
+- Ensure that the `Authorization` header contains a valid Bearer token for all endpoints.
+- The fare is calculated based on the distance and duration between the pickup and destination locations.
